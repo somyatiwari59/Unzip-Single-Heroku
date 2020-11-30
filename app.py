@@ -3,6 +3,7 @@ from flask import request
 import zipfile
 from io import BytesIO
 import json
+import csv
 
 
 app = flask.Flask(__name__)
@@ -23,9 +24,14 @@ def main():
             for info in zip_ref.infolist():
                 data = info.filename
                 myHTML = zip_ref.read(data)
-                UnzippedFiles.append(myHTML)
+                myHTML = myHTML.decode("utf-8")                
+                csv_reader = csv.reader(myHTML.split('\n'))
+                for row in csv_reader:
+                    if len(row) > 8 :
+                        if row[6] == 'MO' :
+                            UnzippedFiles.append(row[8])
     response = app.response_class(
-        response = UnzippedFiles,
+        response = json.dumps(UnzippedFiles),
         status = 200,
         mimetype = 'application/json'
     )
